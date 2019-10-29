@@ -99,7 +99,9 @@ func addOne(w http.ResponseWriter, r *http.Request) {
 
 func deleteOne(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	servers[vars["id"]].Shutdown()
+	if _, ok := servers[vars["id"]]; ok {
+		servers[vars["id"]].Shutdown()
+	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "ok")
 }
