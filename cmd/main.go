@@ -20,13 +20,13 @@ type response struct {
 }
 
 type serviceInfo struct {
-	instance string
-	service  string
-	domain   string
-	port     int
-	hostName string
-	ip       string
-	text     []string
+	Instance string   `json:"instance"`
+	Service  string   `json:"service"`
+	Domain   string   `json:"domain"`
+	Port     int      `json:"port"`
+	HostName string   `json:"host_name"`
+	Ip       string   `json:"ip"`
+	Text     []string `json:"text"`
 }
 
 var (
@@ -85,15 +85,16 @@ func addOne(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "{}")
 		return
 	}
-	server, err := zeroconf.RegisterProxy(newEntry.instance, newEntry.service, newEntry.domain,
-		newEntry.port, newEntry.hostName, []string{newEntry.ip}, newEntry.text, nil)
+	server, err := zeroconf.RegisterProxy(newEntry.Instance, newEntry.Service, newEntry.Domain,
+		newEntry.Port, newEntry.HostName, []string{newEntry.Ip}, newEntry.Text, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusBadGateway)
 		fmt.Fprintf(w, "{}")
 		return
 	}
 	servers[uuid.Must(uuid.NewV4()).String()] = server
-
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "{}")
 }
 
 func deleteOne(w http.ResponseWriter, r *http.Request) {
