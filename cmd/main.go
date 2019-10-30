@@ -102,6 +102,7 @@ func deleteOne(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	if _, ok := servers[vars["id"]]; ok {
 		servers[vars["id"]].Shutdown()
+		delete(servers, vars["id"])
 	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, s, 0, "delete mdns service ok")
