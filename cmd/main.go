@@ -30,6 +30,7 @@ type serviceInfo struct {
 }
 
 var (
+	s       = `{"code":%d,"result":[],"msg":"%s"}`
 	router  = mux.NewRouter().StrictSlash(true)
 	servers = make(map[string]*zeroconf.Server)
 	//	TODO 端口检测功能（决定是否注册）
@@ -76,25 +77,25 @@ func addOne(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadGateway)
-		fmt.Fprintf(w, "{}")
+		fmt.Fprintf(w, s, 1, err.Error())
 		return
 	}
 	err = json.Unmarshal(body, newEntry)
 	if err != nil {
 		w.WriteHeader(http.StatusBadGateway)
-		fmt.Fprintf(w, "{}")
+		fmt.Fprintf(w, s, 1, err.Error())
 		return
 	}
 	server, err := zeroconf.RegisterProxy(newEntry.Instance, newEntry.Service, newEntry.Domain,
 		newEntry.Port, newEntry.HostName, []string{newEntry.Ip}, newEntry.Text, nil)
 	if err != nil {
 		w.WriteHeader(http.StatusBadGateway)
-		fmt.Fprintf(w, "{}")
+		fmt.Fprintf(w, s, 1, err.Error())
 		return
 	}
 	servers[uuid.Must(uuid.NewV4()).String()] = server
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "{}")
+	fmt.Fprintf(w, s, 0, "add mdns service ok")
 }
 
 func deleteOne(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +104,7 @@ func deleteOne(w http.ResponseWriter, r *http.Request) {
 		servers[vars["id"]].Shutdown()
 	}
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "ok")
+	fmt.Fprintf(w, s, 0, "delete mdns service ok")
 }
 
 func getAll(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +115,7 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "{}")
+		fmt.Fprintf(w, s, 1, err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusOK)
